@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>게시글 삭제 확인</title>
+</head>
+<body>
+    <h2>게시글 삭제 확인</h2>
+    <p>이 글 및 이미지 파일을 완전히 삭제합니다. 계속하시겠습니까?</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">확인</button>
+        {% comment %} <a href="{% url 'post_detail' object.pk %}">취소</a> {% endcomment %}
+    </form>
+</body>
+</html>
