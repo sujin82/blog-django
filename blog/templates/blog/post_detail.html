@@ -10,5 +10,19 @@
         <h1>{{ post.title }}</h1>
         <p>{{ post.content }}</p>
     </div>
+
+    
+    {% if request.user.is_authenticated and request.user == post.author %}
+    <div>
+        <!-- 수정 버튼 -->
+        <a href="{% url 'post_edit' post.pk %}">수정하기</a>
+
+        <!-- 삭제 버튼 -->
+        <form action="{% url 'post_delete' post.pk %}" method="post">
+            {% csrf_token %}
+            <button type="submit">삭제하기</button>
+        </form>
+    </div>
+    {% endif %}
 </body>
 </html>
