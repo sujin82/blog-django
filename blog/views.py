@@ -1,6 +1,8 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Post
 from .forms import PostForm
+
 
 
 # 메인 뷰 : TemplateView로 시작해서 기능을 추가하면서 커스텀 뷰 클래스로 전환 계획
@@ -21,21 +23,25 @@ post_detail = DetailView.as_view(
 
 
 # 블로그 글쓰기
-post_write = CreateView.as_view(
-    model=Post,
-    form_class=PostForm,
-    template_name="blog/post_write.html",
-    success_url="/blog/",  
-)
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model=Post
+    form_class=PostForm
+    template_name="blog/post_write.html"
+    success_url="/blog/"
+
+post_write = PostCreateView.as_view()
+
 
 
 # 블로그 글 수정하기
-post_edit = UpdateView.as_view(
-    model=Post,
-    form_class=PostForm,
-    template_name="blog/post_edit.html",
-    success_url="/blog/", # 동적으로 변경(수정후에는 상세가 보이게)
-)
+class PostUpdateView(LoginRequiredMixin, UpdateView):
+    model=Post
+    form_class=PostForm
+    template_name="blog/post_edit.html"
+    success_url="/blog/" # 동적으로 변경(수정후에는 상세가 보이게)
+
+post_edit = PostUpdateView.as_view()
+
 
 
 # 블로그 글 삭제 :: 테스트를 위해 post_confirm_delete.html 페이지로 생성했지만 js의 confirm()이나 모달 팝업으로 대체할 예정
@@ -48,5 +54,4 @@ post_delete = DeleteView.as_view(
 # 게시글 검색 기능(FBV) : 타이틀검색(검색 필드 폼 활용), 카테고리(탭 디자인)
 class PostSearchView(ListView):
     pass
-    # 참고할 파일.py 확인
     

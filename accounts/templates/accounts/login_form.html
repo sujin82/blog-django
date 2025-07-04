@@ -1,0 +1,9 @@
+<form action="" method="post" novalidate>
+    {% csrf_token %}
+
+    <table>
+        {{ form.as_table }}
+    </table>
+
+    <button type="submit">로그인</button>
+</form>
