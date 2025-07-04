@@ -1,5 +1,4 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView   # CBV 방식
-from django.urls import reverse
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView 
 from .models import Post
 from .forms import PostForm
 
@@ -46,8 +45,8 @@ post_delete = DeleteView.as_view(
 )
 
 
-# 게시글 검색 기능
-post_search = ListView.as_view(
-    model=Post,
+# 게시글 검색 기능(FBV) : 타이틀검색(검색 필드 폼 활용), 카테고리(탭 디자인)
+class PostSearchView(ListView):
+    pass
+    # 참고할 파일.py 확인
     
-)

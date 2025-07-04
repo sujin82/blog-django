@@ -1,0 +1,163 @@
+<!-- templates/blog/post_search.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블로그 검색</title>
+    <style>
+        /* 기본 스타일 */
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        /* 검색폼 스타일 */
+        .search-form { margin-bottom: 20px; }
+        .search-input { padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 4px; }
+        .search-btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .search-btn:hover { background: #0056b3; }
+        
+        /* 카테고리 탭 스타일 */
+        .category-tabs { margin-bottom: 20px; }
+        .tab { display: inline-block; padding: 10px 20px; background: #f8f9fa; border: 1px solid #ddd; margin-right: 5px; text-decoration: none; color: #333; border-radius: 4px; }
+        .tab:hover { background: #e9ecef; }
+        .tab.active { background: #007bff; color: white; }
+        
+        /* 정렬 버튼 스타일 */
+        .sort-options { margin-bottom: 20px; }
+        .sort-btn { padding: 8px 15px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; margin-right: 10px; }
+        .sort-btn:hover { background: #5a6268; }
+        .sort-btn.active { background: #28a745; }
+        
+        /* 검색 결과 스타일 */
+        .search-results { margin-bottom: 20px; }
+        .post-item { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px; }
+        .post-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+        .post-meta { color: #666; font-size: 14px; margin-bottom: 10px; }
+        .post-content { color: #333; }
+        
+        /* 페이지네이션 스타일 */
+        .pagination { text-align: center; margin-top: 20px; }
+        .pagination a { padding: 8px 12px; background: #f8f9fa; border: 1px solid #ddd; text-decoration: none; color: #333; margin: 0 2px; border-radius: 4px; }
+        .pagination a:hover { background: #e9ecef; }
+        .pagination .current { padding: 8px 12px; background: #007bff; color: white; border: 1px solid #007bff; margin: 0 2px; border-radius: 4px; }
+        
+        /* 메시지 스타일 */
+        .no-results { text-align: center; color: #666; font-style: italic; }
+        .search-info { margin-bottom: 20px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>블로그 검색</h1>
+        
+        <!-- 1. 제목 검색용 폼 -->
+        <div class="search-form">
+            <form method="get" action="{% url 'search_redirect' %}">
+                <!-- 검색어 입력칸 -->
+                <input type="text" name="q" class="search-input" placeholder="제목으로 검색하세요..." 
+                       value="{% if search_type == 'title' %}{{ search_tag }}{% endif %}">
+                <!-- 검색 버튼 -->
+                <button type="submit" class="search-btn">검색</button>
+            </form>
+        </div>
+        
+        <!-- 2. 카테고리 탭 메뉴 -->
+        <div class="category-tabs">
+            <h3>카테고리별 보기:</h3>
+            <!-- 각 카테고리마다 탭 버튼 만들기 -->
+            {% for category in categories %}
+                <a href="{% url 'post_search' tag=category %}" class="tab 
+                   {% if search_type == 'category' and search_tag == category %}active{% endif %}">
+                    {{ category }}
+                </a>
+            {% endfor %}
+        </div>
+        
+        <!-- 3. 검색 결과 정보 표시 -->
+        {% if search_tag %}
+            <div class="search-info">
+                {% if search_type == 'category' %}
+                    <strong>"{{ search_tag }}"</strong> 카테고리 검색 결과: <strong>{{ total_count }}개</strong>
+                {% else %}
+                    <strong>"{{ search_tag }}"</strong> 제목 검색 결과: <strong>{{ total_count }}개</strong>
+                {% endif %}
+            </div>
+        {% endif %}
+        
+        <!-- 4. 정렬 옵션 (검색 결과가 있을 때만 표시) -->
+        {% if posts %}
+            <div class="sort-options">
+                <strong>정렬:</strong>
+                <!-- 최신순 버튼 -->
+                <a href="?sort=latest" class="sort-btn {% if current_sort == 'latest' %}active{% endif %}">
+                    최신순
+                </a>
+                <!-- 오래된순 버튼 -->
+                <a href="?sort=oldest" class="sort-btn {% if current_sort == 'oldest' %}active{% endif %}">
+                    오래된순
+                </a>
+            </div>
+        {% endif %}
+        
+        <!-- 5. 검색 결과 목록 -->
+        <div class="search-results">
+            {% if posts %}
+                <!-- 검색 결과가 있으면 게시글 목록 표시 -->
+                {% for post in posts %}
+                    <div class="post-item">
+                        <!-- 게시글 제목 -->
+                        <div class="post-title">
+                            <a href="{% url 'post_detail' pk=post.pk %}">{{ post.title }}</a>
+                        </div>
+                        <!-- 게시글 정보 (카테고리, 작성일) -->
+                        <div class="post-meta">
+                            카테고리: {{ post.category }} | 
+                            작성일: {{ post.created_at|date:"Y-m-d H:i" }}
+                        </div>
+                        <!-- 게시글 내용 미리보기 (처음 100자만) -->
+                        <div class="post-content">
+                            {{ post.content|truncatewords:20 }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% elif search_tag %}
+                <!-- 검색했는데 결과가 없으면 메시지 표시 -->
+                <div class="no-results">
+                    {{ no_results_message }}
+                </div>
+            {% else %}
+                <!-- 검색어가 없으면 안내 메시지 -->
+                <div class="no-results">
+                    검색어를 입력하거나 카테고리를 선택해주세요.
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- 6. 페이지네이션 (검색 결과가 여러 페이지일 때) -->
+        {% if posts.has_other_pages %}
+            <div class="pagination">
+                <!-- 이전 페이지 버튼 -->
+                {% if posts.has_previous %}
+                    <a href="?page={{ posts.previous_page_number }}&sort={{ current_sort }}">&laquo; 이전</a>
+                {% endif %}
+                
+                <!-- 페이지 번호들 -->
+                {% for page_num in posts.paginator.page_range %}
+                    {% if page_num == posts.number %}
+                        <!-- 현재 페이지는 버튼 비활성화 -->
+                        <span class="current">{{ page_num }}</span>
+                    {% else %}
+                        <!-- 다른 페이지는 링크로 -->
+                        <a href="?page={{ page_num }}&sort={{ current_sort }}">{{ page_num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- 다음 페이지 버튼 -->
+                {% if posts.has_next %}
+                    <a href="?page={{ posts.next_page_number }}&sort={{ current_sort }}">다음 &raquo;</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
