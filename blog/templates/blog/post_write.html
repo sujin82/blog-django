@@ -7,12 +7,16 @@
 </head>
 <body>
     <h1>블로그 작성</h1>
-    <form action="" method="post" novalidate><!-- 이미지/파일 업로드시 enctype="multipart/form-data" 속성 추가할것 -->
+    <form action="" method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-        <table>
-            {{ form.as_table }}
-        </table>
-        <button type="submit">작성하기</button>
+        <select name="category">
+            <option value="travel">여행</option>
+            <option value="food">맛집</option>
+        </select>
+        <input type="text" name="title" placeholder="제목">
+        <textarea name="content" placeholder="내용"></textarea>
+        <input type="file" name="upload_img" accept="image/*">
+        <button type="submit">작성완료</button>
     </form>
 </body>
 </html>
