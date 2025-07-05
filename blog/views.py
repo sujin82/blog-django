@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .models import Post
+from .models import Post, Like
 from .forms import PostForm
 from django.views import View
 from django.http import JsonResponse
@@ -97,14 +97,26 @@ class PostSearchView(ListView):
 
 
 class ToggleLikeView(LoginRequiredMixin, View):
-    def post(self, request, post_id):
-        post = get_object_or_404(Post, id=post_id)
-        like, created = Like.objects.get_or_create(user=request.user, post=post)
+    def post(self, request, pk):
+        post = get_object_or_404(Post, id=pk)
+
+        if request.user == post.author:
+            return JsonResponse({
+                'error': '본인이 작성한 게시글에는 좋아요를 누를 수 없어요.',
+                'liked': False,
+                'likes_count': post.like_set.count()
+            }, status=400)
         
-        if not created:
-            like.delete()
+        has_liked = Like.objects.filter(
+            user=request.user,
+            post = post
+        ).exists()
+        
+        if has_liked:
+            Like.objects.filter(user=request.user, post=post).delete()
             liked = False
         else:
+            Like.objects.create(user=request.user, post=post)
             liked = True
         
         return JsonResponse({

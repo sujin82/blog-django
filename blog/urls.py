@@ -9,5 +9,5 @@ urlpatterns = [
     path("blog/edit/<int:pk>/", views.PostUpdateView.as_view(), name="post_edit"),
     path("blog/delete/<int:pk>/", views.PostDeleteView.as_view(), name="post_delete"),
     # path("blog/search/<str:tag>/", views.post_search, name="post_search"),
-    path('like/<int:post_id>/', views.ToggleLikeView.as_view(), name='toggle_like'),
+    path('blog/<int:pk>/like/', views.ToggleLikeView.as_view(), name='toggle_like'),
 ]

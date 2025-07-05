@@ -6,6 +6,8 @@
     <title>{{ post.author }} 블로그</title>
 </head>
 <body>
+    {% csrf_token %}
+    
     <div>
         <h1>{{ post.title }}</h1>
         <p>조회수 {{ post.view_count }}</p>
@@ -17,6 +19,23 @@
             <img src="{{ post.upload_img.url }}" alt="게시글 이미지" class="img-fluid">
         </div>
     {% endif %}
+
+    <div class="like-section"><!-- 좋아요 -->
+        <button class="like-btn" 
+            data-post-id="{{ post.id }}"
+            {% if not user.is_authenticated %}
+                data-action="login-required"
+            {% elif user == post.author %}
+                data-action="own-post"
+                disabled
+            {% else %}
+                data-action="toggle-like"
+            {% endif %}
+        >
+            <img class="like-img" src="/static/images/free-icon-like-symbol-5881205.png" alt="좋아요">
+            <span class="like-count">{{ post.like_set.count }}</span>개
+        </button>
+    </div>
 
     
     {% if request.user.is_authenticated and request.user == post.author %}
@@ -31,5 +50,61 @@
         </form>
     </div>
     {% endif %}
+
+
+
+    <script>
+        const likeBtn = document.querySelector('.like-btn');
+        if (likeBtn) {
+            likeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const action = this.getAttribute('data-action');
+                const postId = this.getAttribute('data-post-id');
+                
+                // 비로그인 사용자
+                if (action === 'login-required') {
+                    alert('좋아요를 누르려면 로그인이 필요합니다.');
+                    // window.location.href = '/accounts/login/';
+                    // return;
+                }
+                
+                // 작성자 본인
+                if (action === 'own-post') {
+                    alert('본인이 작성한 게시글에는 좋아요를 누를 수 없습니다.');
+                    // return;
+                }
+                
+                // 정상적인 좋아요 처리
+                if (action === 'toggle-like') {
+                    fetch(`/blog/${postId}/like/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(data.error);
+                            return;
+                        }
+                        
+                        const img = document.querySelector('.like-img');
+                        const count = document.querySelector('.like-count');
+                        
+                        if (img && count) {
+                            if (data.liked) {
+                                img.src = '/static/images/free-icon-like-6924834.png';
+                            } else {
+                                img.src = '/static/images/free-icon-like-symbol-5881205.png';
+                            }
+                            count.textContent = data.likes_count;
+                        }
+                    });
+                }
+            });
+        }
+    </script>
 </body>
 </html>
