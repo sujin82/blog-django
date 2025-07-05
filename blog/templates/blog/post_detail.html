@@ -3,13 +3,19 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>my 블로그 게시글 상세</title>
+    <title>{{ post.author }} 블로그</title>
 </head>
 <body>
     <div>
         <h1>{{ post.title }}</h1>
-        <p>{{ post.content }}</p>
+        <p>{{ post.content|linebreaks }}</p>
     </div>
+
+    {% if post.upload_img %}
+        <div class="post-image">
+            <img src="{{ post.upload_img.url }}" alt="게시글 이미지" class="img-fluid">
+        </div>
+    {% endif %}
 
     
     {% if request.user.is_authenticated and request.user == post.author %}

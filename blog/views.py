@@ -44,11 +44,15 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model=Post
     form_class=PostForm
     template_name="blog/post_edit.html"
-    success_url="/blog/" # ★ 동적으로 변경(수정후에는 상세가 보이게)
 
     def test_func(self):
         post = self.get_object()
         return post.author == self.request.user
+    
+    def get_success_url(self):
+        return f"/blog/{self.object.pk}/"
+    
+    success_url="/blog/" # ★ 동적으로 변경(수정후에는 상세가 보이게)
 
 post_edit = PostUpdateView.as_view()
 
