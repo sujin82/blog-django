@@ -1,3 +1,4 @@
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post
@@ -17,11 +18,28 @@ post_list = ListView.as_view(
 
 
 # 블로그 게시글 상세
-post_detail = DetailView.as_view(
-    model=Post,
-    template_name="blog/post_detail.html",
-    context_object_name="post"
-)
+def post_detail(request, pk):   # CBV로 나중에 바꾸자
+    post = get_object_or_404(Post, pk=pk)
+
+    viewed_posts = request.session.get('viewed_posts', [])
+
+    is_viewed = pk in viewed_posts
+    is_author = request.user.is_authenticated and request.user == post.author
+
+    if not is_author and not is_viewed:
+        post.view_count += 1
+        post.save(update_fields=['view_count'])
+
+        viewed_posts.append(pk)
+
+        if len(viewed_posts) > 100:
+            viewed_posts = viewed_posts[-100:]
+
+        request.session['viewed_posts'] = viewed_posts
+        request.session.modified = True
+    
+    return render(request, 'blog/post_detail.html', {'post': post})
+
 
 
 # 블로그 글쓰기
