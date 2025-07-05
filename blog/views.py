@@ -3,6 +3,8 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post
 from .forms import PostForm
+from django.views import View
+from django.http import JsonResponse
 
 
 
@@ -53,8 +55,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
-post_write = PostCreateView.as_view()
-
 
 
 # 블로그 글 수정하기
@@ -72,8 +72,6 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     
     success_url="/blog/" # ★ 동적으로 변경(수정후에는 상세가 보이게)
 
-post_edit = PostUpdateView.as_view()
-
 
 
 # 블로그 글 삭제 :: ★ 테스트를 위해 post_confirm_delete.html 페이지로 생성했지만 js의 confirm()이나 모달 팝업으로 대체할 예정
@@ -86,8 +84,6 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         post = self.get_object()
         return post.author == self.request.user
 
-post_delete = PostDeleteView.as_view()
-
 
 
 
@@ -95,3 +91,23 @@ post_delete = PostDeleteView.as_view()
 class PostSearchView(ListView):
     pass
     
+
+
+
+
+
+class ToggleLikeView(LoginRequiredMixin, View):
+    def post(self, request, post_id):
+        post = get_object_or_404(Post, id=post_id)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        
+        if not created:
+            like.delete()
+            liked = False
+        else:
+            liked = True
+        
+        return JsonResponse({
+            'liked': liked,
+            'likes_count': post.like_set.count()
+        })
