@@ -5,18 +5,7 @@
     <title>blog</title>
 </head>
 <body>
-    <div>
-        <h1>블로그</h1>
-        {% if user.is_authenticated %}
-            <form method="post" action="/logout/">
-                {% csrf_token %}
-                <p>{{ user }}님 안녕하세요</p>
-                <button type="submit">로그아웃</button>
-            </form>
-        {% else %}
-            <a href="/login/">로그인</a>
-        {% endif %}
-    </div>
+    {% include "base.html" %}
     <a href="/blog/">게시글 목록으로 이동</a>
 </body>
 </html>

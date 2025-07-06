@@ -28,7 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'blog',
     'accounts',
-    'django_cleanup.apps.CleanupConfig',    # 맨 마지막에 추가해야된다함
+    'django_cleanup.apps.CleanupConfig',    # 맨 마지막줄에 추가해야함
 ]
 
 MIDDLEWARE = [
