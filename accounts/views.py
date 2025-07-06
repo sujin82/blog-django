@@ -4,7 +4,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import authenticate, login
 from django.db import transaction
 from django.contrib import messages
-from django.views.generic import UpdateView
+from django.views.generic import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Profile
 
@@ -54,17 +54,36 @@ login_view = LoginView.as_view(
 logout_view = LogoutView.as_view(next_page='/')
 
 
+# class ProfileCreateView(LoginRequiredMixin, CreateView):
+#     model = Profile
+#     form_class = ProfileForm
+
+#     def form_valid(self, form):
+#         form.instance.user = self.request.user
+#         messages.success(self.request, '프로필이 생성되었습니다.')
+#         return super().form_valid(form)
+    
+
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = Profile
     form_class = ProfileForm
     template_name = "accounts/profile_edit.html"
     context_object_name = "profile"
-    success_url = ("/") # 확인
+    success_url = "/" # 확인
 
     def get_object(self):
-        return get_object_or_404(Profile, user=self.request.user)
-    
+        profile, created = Profile.objects.get_or_create(user=self.request.user)
+        if created:
+            messages.info(self.request, '프로필이 생성되었습니다.')
+        return profile
+        
     def form_valid(self, form):
+        if form.cleaned_data.get('use_default_image'):
+            if self.object.upload_img:  # 기존 업로드된 이미지 삭제 할 때
+                self.object.upload_img.delete()
+                        
+            self.object.upload_img = None
+        
         messages.success(self.request, '프로필이 수정되었습니다.')
         return super().form_valid(form)

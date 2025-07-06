@@ -17,9 +17,9 @@
                 {% csrf_token %}
                 <p>{{ user }}님 안녕하세요</p>
 
-                {% if user.is_authenticated and user.profile.upload_img %}
+                {% if user.is_authenticated %}
                     <div class="profile-image">
-                        <img src="{{ user.profile.upload_img.url }}" alt="프로필 이미지" class="img-fluid">
+                        <img src="{{ user.profile.profile_image_url }}" alt="프로필 이미지" class="img-fluid">
                     </div>
                 {% endif %}
 

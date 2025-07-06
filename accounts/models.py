@@ -19,3 +19,10 @@ class Profile(models.Model):
     # interests = models.CharField() : 태그(10~20개) 제시하고 5개까지 다중선택 할 수 있게 제공할 예정
     def __str__(self):
         return f"{self.nickname.strip() or self.user.username}의 프로필"
+    
+    @property
+    def profile_image_url(self):
+        if self.upload_img:
+            return self.upload_img.url
+        else:
+            return "/static/images/default-profile.png"

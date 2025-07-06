@@ -21,6 +21,7 @@ class RegisterForm(UserCreationForm):
 
 
 class ProfileForm(forms.ModelForm):
+    use_default_image = forms.BooleanField(required=False, widget=forms.HiddenInput())
     class Meta:
         model = Profile
         fields = ['nickname', 'upload_img', 'birth_date']
