@@ -1,12 +1,12 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import RegisterForm, ProfileForm
+from django.shortcuts import render, redirect
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import authenticate, login
 from django.db import transaction
 from django.contrib import messages
 from django.views.generic import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Profile
+from accounts.forms import RegisterForm, ProfileForm
+from accounts.models import Profile
 
 
 def register(request):  # CBV로 변경 예정

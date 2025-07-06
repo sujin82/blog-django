@@ -1,10 +1,11 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .models import Post, Like
-from .forms import PostForm
 from django.views import View
 from django.http import JsonResponse
+from blog.models import Post, Like, Comment
+from blog.forms import PostForm, CommentForm
 
 
 
@@ -23,8 +24,20 @@ post_list = ListView.as_view(
 def post_detail(request, pk):   # CBV로 나중에 바꾸자
     post = get_object_or_404(Post, pk=pk)
 
-    viewed_posts = request.session.get('viewed_posts', [])
+    # 댓글 작성
+    if request.method == "POST" and request.user.is_authenticated:
+        content = request.POST.get('content')
+        if content:
+            Comment.objects.create(
+                content=content,
+                author=request.user,
+                post=post
+            )
+            return redirect('blog:post_detail', pk=pk)
+        
 
+    # 조회수 증가
+    viewed_posts = request.session.get('viewed_posts', [])
     is_viewed = pk in viewed_posts
     is_author = request.user.is_authenticated and request.user == post.author
 
@@ -40,7 +53,8 @@ def post_detail(request, pk):   # CBV로 나중에 바꾸자
         request.session['viewed_posts'] = viewed_posts
         request.session.modified = True
     
-    return render(request, 'blog/post_detail.html', {'post': post})
+    comments = Comment.objects.filter(post=post).order_by('-created_at')
+    return render(request, 'blog/post_detail.html', {'post': post, 'comments':comments})
 
 
 
@@ -95,7 +109,7 @@ class PostSearchView(ListView):
 
 
 
-
+# 좋아요
 class ToggleLikeView(LoginRequiredMixin, View):
     def post(self, request, pk):
         post = get_object_or_404(Post, id=pk)
@@ -123,3 +137,18 @@ class ToggleLikeView(LoginRequiredMixin, View):
             'liked': liked,
             'likes_count': post.like_set.count()
         })
+    
+
+
+# 댓글 생성
+class CommentCreateView(CreateView):
+    model = Comment
+    form_class = CommentForm
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post_id = self.kwargs['pk']
+        return super().form_valid(form)
+    
+    def get_success_url(self):  # kwargs = keyword arguments
+        return reverse('blog:post_detail', kwargs={'pk': self.object.post.pk})
