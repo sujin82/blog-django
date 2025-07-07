@@ -13,8 +13,8 @@ class Profile(models.Model):
     birth_date = models.DateField(blank=True, null=True) # 미사용
     gender = models.BooleanField(blank=True, null=True, default=None) # 미사용
     # interests = models.CharField() : 태그(10~20개) 제시하고 5개까지 다중선택 할 수 있게 제공할 예정
-    def __str__(self):
-        return f"{self.nickname.strip() or self.user.username}의 프로필"
+    def display_name(self):
+        return self.nickname or self.user.username
     
     @property
     def profile_image_url(self):

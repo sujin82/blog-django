@@ -50,7 +50,9 @@ login_view = LoginView.as_view(
     template_name="accounts/login_form.html"
 )
 
-logout_view = LogoutView.as_view(next_page='/')
+logout_view = LogoutView.as_view(
+    next_page="/"
+)
 
 
 
@@ -59,13 +61,9 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     form_class = ProfileForm
     template_name = "accounts/profile_edit.html"
     context_object_name = "profile"
-    success_url = "/" # 확인
 
     def get_object(self):
-        profile, created = Profile.objects.get_or_create(user=self.request.user)
-        if created:
-            pass
-            # messages.info(self.request, '프로필이 생성되었습니다.')
+        profile, _ = Profile.objects.get_or_create(user=self.request.user)
         return profile
         
     def form_valid(self, form):
@@ -74,6 +72,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
                 self.object.upload_img.delete()
                         
             self.object.upload_img = None
-        
-        # messages.success(self.request, '프로필이 수정되었습니다.')
         return super().form_valid(form)
+    
+    def get_success_url(self):
+        return self.request.path
