@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ post.author }} 블로그</title>
-</head>
-<body>
-    {% include "base.html" %}
+{% extends 'base.html' %}
 
+{% block title %} {{ post.author }}의 블로그 {% endblock %}
+
+{% block content %}
     {% csrf_token %}
     
     <div>
@@ -113,8 +108,6 @@
     {% else %}
         <p><a href="{% url 'accounts:login' %}">로그인</a>후 댓글 작성이 가능합니다.</p>
     {% endif %}
-
-
 
     <script>
         // 좋아요
@@ -227,5 +220,6 @@
             }
         } 
     </script>
-</body>
-</html>
+{% endblock %}
+
+

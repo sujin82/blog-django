@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>블로그 전체 게시글 목록</title>
-</head>
-<body>
-    {% include "base.html" %}
+{% extends 'base.html' %}
 
+{% block content %}
     <h1>게시글 목록</h1>
     {% for post in post_list %}
         <div>
@@ -20,7 +13,5 @@
             <p>작성일 {{ post.created_at|date:"Y-m-d" }}</p>
             <p>조회수 {{ post.view_count }}</p>
         </div>
-        <hr />
     {% endfor %}
-</body>
-</html>
+{% endblock %}

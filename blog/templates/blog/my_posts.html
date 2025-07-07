@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나의 게시글 목록</title>
-</head>
-<body>
-    {% include "base.html" %}
+{% extends 'base.html' %}
 
-    <h1>MY 게시글 목록</h1>
+{% block content %}
+    <h1>나의 게시글 목록</h1>
     {% if not post_list %}
         <p>작성한 게시글이 없습니다.</p>
     {% else %}
@@ -26,5 +19,5 @@
             <hr />
         {% endfor %}
     {% endif %}
-</body>
-</html>
+{% endblock %}
+

@@ -7,6 +7,14 @@
 </head>
 <body>
     <h1>블로그 수정</h1>
+    
+</body>
+</html>
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>게시글 수정</h1>
     <form action="" method="post" novalidate><!-- 이미지/파일 업로드시 enctype="multipart/form-data" 속성 추가할것 -->
         {% csrf_token %}
         <table>
@@ -14,5 +22,4 @@
         </table>
         <button type="submit">수정완료</button>
     </form>
-</body>
-</html>
+{% endblock %}
