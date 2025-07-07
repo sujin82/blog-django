@@ -11,6 +11,13 @@
         <input type="text" name="title" placeholder="제목">
         <textarea name="content" placeholder="내용"></textarea>
         <input type="file" name="upload_img" accept="image/*">
+
+        <label class="switch">
+            <input type="checkbox" name="ai_auto_reply" {% if form.ai_auto_reply.value %}checked{% endif %}>
+            <span class="slider round"></span>
+            AI 댓글 자동응답 켜기
+        </label>
+        
         <button type="submit">작성완료</button>
     </form>
 {% endblock %}

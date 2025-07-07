@@ -40,6 +40,8 @@ class Post(models.Model):
     view_count = models.PositiveIntegerField(default=0)
     like_count = models.PositiveIntegerField(default=0)
 
+    ai_auto_reply = models.BooleanField(default=False)  # ai 댓글 자동응답 활성화
+
     def __str__(self):
         return self.title
     class Meta:
