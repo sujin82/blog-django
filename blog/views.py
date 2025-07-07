@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView 
+from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views import View
 from django.http import JsonResponse
@@ -123,12 +124,22 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 
-# 게시글 검색 기능(FBV) : 타이틀검색(검색 필드 폼 활용), 카테고리(탭 디자인)
+# 게시글 검색 기능(FBV) : 검색(검색 필드 폼 활용), 카테고리 선택(탭 디자인)
 class PostSearchView(ListView):
-    pass
-    
+    model = Post
+    template_name = "blog/post_search.html"
+    context_object_name = "posts"
+    paginate_by = 10
 
+    def get_queryset(self):
+        tag = self.kwargs.get("tag")
+        sort = self.request.GET.get("sort", "desc")
 
+        queryset = Post.objects.filter(
+            Q(title__icontains=tag) | Q(content__icontains=tag)
+        ).order_by("-created_at")
+
+        return queryset
 
 
 # 좋아요
