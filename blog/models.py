@@ -31,7 +31,6 @@ class Post(models.Model):
         default='travel'
     )
     # status = models.CharField(...) 상태관리(공개/비공개 설정)
-    view_count = models.IntegerField(default=0)
     upload_img = models.ImageField(
         upload_to=user_post_upload_path, 
         blank=True, 
@@ -43,6 +42,8 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    class Meta:
+        ordering = ['-created_at'] 
     
     
 

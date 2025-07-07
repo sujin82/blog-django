@@ -9,18 +9,22 @@
     {% include "base.html" %}
 
     <h1>MY 게시글 목록</h1>
-    {% for post in post_list %}
-        <div>
-            <h2>
-                <a href="{% url 'blog:post_detail' post.pk %}">
-                    {{ post.title }}
-                </a>
-            </h2>
-            <p>작성자 {{ post.author.username }}</p>
-            <p>작성일 {{ post.created_at|date:"Y-m-d" }}</p>
-            <p>조회수 {{ post.view_count }}</p>
-        </div>
-        <hr />
-    {% endfor %}
+    {% if not post_list %}
+        <p>작성한 게시글이 없습니다.</p>
+    {% else %}
+        {% for post in post_list %}
+            <div>
+                <h2>
+                    <a href="{% url 'blog:post_detail' post.pk %}">
+                        {{ post.title }}
+                    </a>
+                </h2>
+                {% comment %} <p>작성자 {{ post.author.username }}</p> {% endcomment %}
+                <p>작성일 {{ post.created_at|date:"Y-m-d" }}</p>
+                <p>조회수 {{ post.view_count }}</p>
+            </div>
+            <hr />
+        {% endfor %}
+    {% endif %}
 </body>
 </html>

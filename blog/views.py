@@ -1,11 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views import View
 from django.http import JsonResponse
 from blog.models import Post, Like, Comment
 from blog.forms import PostForm, CommentForm
+import json
 
 
 
@@ -164,3 +166,40 @@ class CommentCreateView(CreateView):
     
     def get_success_url(self):  # kwargs = keyword arguments
         return reverse('blog:post_detail', kwargs={'pk': self.object.post.pk})
+    
+
+
+# 댓글 수정&삭제(ajax view 처리) : 댓글 작성자 본인만 가능
+@csrf_exempt
+def comment_update_ajax(request, pk):
+    if request.method == "GET":
+        return render(request, "404.html", status=400)
+    
+    if request.method == "POST":
+        data = json.loads(request.body)
+        comment_id = data.get("comment_id")
+
+        comment = get_object_or_404(Comment, pk=comment_id, post_id=pk)
+        
+        if request.user == comment.author:
+            comment.content = data.get("content")
+            comment.save()
+            return JsonResponse({"status":"success"})
+        
+        return JsonResponse({"status":"error"})
+
+
+@csrf_exempt  
+def comment_delete_ajax(request, pk):
+    if request.method == "GET":
+        return render(request, "404.html", status=400)
+    
+    if request.method == "POST":
+        data = json.loads(request.body)
+        comment_id = data.get("comment_id")
+        comment = get_object_or_404(Comment, pk=comment_id, post_id=pk)
+        
+        if request.user == comment.author:
+            comment.delete()
+            return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"})

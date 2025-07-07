@@ -59,13 +59,20 @@
     <!-- 댓글 목록 -->
     <h3>댓글 ({{ comments.count }}개)</h3>
     {% for comment in comments %}
-        <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+        <div id="comment-{{ comment.id }}">
             <strong>{{ comment.author.username }}</strong>
             <small>{{ comment.created_at|date:"Y-m-d H:i" }}</small>
-            <p>{{ comment.content|linebreaks }}</p>
+            <div class="comment-content">
+                <span>{{ comment.content|linebreaks }}</span>
+            
+                {% if comment.author == user %}
+                    <button onclick="editComment({{ comment.id }})">수정</button>
+                    <button onclick="deleteComment({{ comment.id }})">삭제</button>
+                {% endif %}
+            </div>
         </div>
     {% empty %}
-        <p>댓글이 없습니다.</p>
+        <p>댓글이 아직 없습니다.</p>
     {% endfor %}
 
     <!-- 댓글 작성 폼 -->
@@ -76,12 +83,13 @@
             <button type="submit">댓글 작성</button>
         </form>
     {% else %}
-        <p><a href="{% url 'accounts:login' %}">로그인</a>해서 댓글을 작성하세요.</p>
+        <p><a href="{% url 'accounts:login' %}">로그인</a>후 댓글 작성이 가능합니다.</p>
     {% endif %}
 
 
 
     <script>
+        // 좋아요
         const likeBtn = document.querySelector('.like-btn');
         if (likeBtn) {
             likeBtn.addEventListener('click', function(e) {
@@ -133,6 +141,63 @@
                 }
             });
         }
+
+
+        // 댓글 수정&삭제하기
+        function editComment(commentId) {   // 수정모드
+            const commentDiv = document.getElementById(`comment-${commentId}`);
+            const content = commentDiv.querySelector('.comment-content p').textContent.trim();
+            
+            commentDiv.querySelector('.comment-content').innerHTML = `
+                <textarea id="edit-${commentId}">${content}</textarea>
+                <button onclick="saveComment(${commentId})">저장</button>
+                <button onclick="location.reload()">취소</button>
+            `;
+        }
+
+
+        function saveComment(commentId) {
+            const content = document.getElementById(`edit-${commentId}`).value;
+            
+            fetch(`/blog/{{ post.pk }}/comments/edit/`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    comment_id: commentId,
+                    content: content
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => {
+                console.log('응답 상태:', response.status);  // 디버깅용
+                return response.json();
+            })
+            .then(data => {
+                console.log('응답 데이터:', data);  // 디버깅용
+                location.reload();
+            })
+            .catch(error => {
+                console.error('에러:', error);  // 디버깅용
+            });
+        }
+
+        function deleteComment(commentId) {
+            if(confirm('댓글을 삭제하시겠습니까?')) {
+                fetch(`/blog/{{ post.pk }}/comments/delete/`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        comment_id: commentId
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(() => location.reload());
+            }
+        } 
     </script>
 </body>
 </html>
