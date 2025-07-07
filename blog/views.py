@@ -45,7 +45,6 @@ def post_detail(request, pk):   # CBV로 나중에 바꾸자
     if not is_author and not is_viewed:
         post.view_count += 1
         post.save(update_fields=['view_count'])
-
         viewed_posts.append(pk)
 
         if len(viewed_posts) > 100:
@@ -55,8 +54,17 @@ def post_detail(request, pk):   # CBV로 나중에 바꾸자
         request.session.modified = True
     
     comments = Comment.objects.filter(post=post).order_by('-created_at')
-    return render(request, 'blog/post_detail.html', {'post': post, 'comments':comments})
 
+    # 이전/다음 게시글 보여주기
+    prev_post = Post.objects.filter(pk__lt=pk).order_by('-pk').first()
+    next_post = Post.objects.filter(pk__gt=pk).order_by('pk').first()
+
+    return render(request, "blog/post_detail.html",{
+        'post': post,
+        'comments': comments,
+        'prev_post': prev_post,
+        'next_post': next_post
+    })
 
 
 # 나의 블로그 게시글 목록

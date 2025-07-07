@@ -53,6 +53,34 @@
     </div>
     {% endif %}
 
+    <hr />
+
+    <!-- 이전/다음 게시글 네비게이션 -->
+    <div class="post-navigation">
+        <div class="nav-item">
+            {% if prev_post %}
+                <a href="{% url 'blog:post_detail' prev_post.pk %}">
+                    이전글: {{ prev_post.title }}
+                </a>
+            {% else %}
+                <span class="disabled">이전글이 없습니다</span>
+            {% endif %}
+        </div>
+
+        <div class="nav-item current">
+            <span class="current-post">현재글: {{ post.title }}</span>
+        </div>
+        
+        <div class="nav-item">
+            {% if next_post %}
+                <a href="{% url 'blog:post_detail' next_post.pk %}">
+                    다음글: {{ next_post.title }}
+                </a>
+            {% else %}
+                <span class="disabled">다음글이 없습니다</span>
+            {% endif %}
+        </div>
+    </div>
 
 
     <hr />
