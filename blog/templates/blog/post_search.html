@@ -1,19 +1,28 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>게시글 목록</h1>
-    {% for post in post_list %}
-        <div>
-            <h2>
-                <a href="{% url 'blog:post_detail' post.pk %}">
-                    {{ post.title }}
-                </a>
-            </h2>
-            <p>작성자 {{ post.author.username }}</p>
-            <p>작성일 {{ post.created_at|date:"Y-m-d" }}</p>
-            <p>조회수 {{ post.view_count }}</p>
-        </div>
-        {% empty %}
-        <div>검색 결과가 없습니다.</div>
-    {% endfor %}
+    {% if posts %}
+        <h1>검색 결과</h1>
+        <p>검색어: <strong>{{ q }}</strong></p>
+        <!-- 나중에 검색된 단어 하이라이트 처리해보기 -->
+        <ul>
+            {% for post in posts %}
+                <li>
+                    <div>
+                        <a href="{% url 'blog:post_detail' post.pk %}">
+                            {{ post.title }}
+                            {{ post.content }}
+                        </a>
+                        <p>작성자 {{ post.author.username }}</p>
+                        <p>작성일 {{ post.created_at|date:"Y-m-d" }}</p>
+                        <p>조회수 {{ post.view_count }}</p>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>"{{ q }}"에 해당하는 게시글이 없습니다.</p>
+    {% endif %}
+
+    
 {% endblock %}

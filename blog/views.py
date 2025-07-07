@@ -129,17 +129,22 @@ class PostSearchView(ListView):
     model = Post
     template_name = "blog/post_search.html"
     context_object_name = "posts"
-    paginate_by = 10
+    # paginate_by = 10
 
     def get_queryset(self):
-        tag = self.kwargs.get("tag")
-        sort = self.request.GET.get("sort", "desc")
+        query = self.request.GET.get("q", "")
+        if query:
+            return Post.objects.filter(
+                Q(title__icontains=query) | Q(content__icontains=query)
+            ).distinct().order_by('-created_at')
+        return Post.objects.none()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q', '')
+        return context
 
-        queryset = Post.objects.filter(
-            Q(title__icontains=tag) | Q(content__icontains=tag)
-        ).order_by("-created_at")
 
-        return queryset
 
 
 # 좋아요

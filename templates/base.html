@@ -18,12 +18,20 @@
     <!-- 기본 CSS -->
     <link href="" rel="stylesheet">
     <!-- 페이지별 추가 CSS -->
-    <style>{% block extra_css %}{% endblock %}</style>
+    <style></style>
 </head>
 <body>
     <div id="wrapper">
         <div class="header">
             <h1><a href="/">여행맛집로그</a></h1>
+
+            <h1>게시글 검색</h1>
+
+            <form method="get" action="{% url 'blog:post_search' %}">
+                <input type="text" name="q" placeholder="검색어를 입력하세요" value="{{ q }}">
+                <button type="submit">검색</button>
+            </form>
+
             <div class="user-navigation">
                 <!-- 로그인된 사용자 영역 -->
                 {% if user.is_authenticated %}
