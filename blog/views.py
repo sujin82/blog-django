@@ -33,8 +33,7 @@ def post_detail(request, pk):   # CBV로 나중에 바꾸자
                 author=request.user,
                 post=post
             )
-            return redirect('blog:post_detail', pk=pk)
-        
+            return redirect('blog:post_detail', pk=pk) 
 
     # 조회수 증가
     viewed_posts = request.session.get('viewed_posts', [])
@@ -58,16 +57,29 @@ def post_detail(request, pk):   # CBV로 나중에 바꾸자
 
 
 
+# 나의 블로그 게시글 목록
+class MyPostListView(LoginRequiredMixin, ListView):
+    model = Post
+    template_name = "blog/my_posts.html"
+    context_object_name = "post_list"
+
+    def get_queryset(self):
+        return Post.objects.filter(author=self.request.user).order_by("-created_at")
+
+
+
 # 블로그 글쓰기
 class PostCreateView(LoginRequiredMixin, CreateView):
     model=Post
     form_class=PostForm
     template_name="blog/post_write.html"
-    success_url="/blog/"
 
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse("blog:post_detail", kwargs={"pk": self.object.pk})
 
 
 

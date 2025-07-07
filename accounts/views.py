@@ -28,13 +28,12 @@ def register(request):  # CBV로 변경 예정
 
             if user:
                 login(request, user)
-                messages.success(request, "회원가입이 완료되었습니다.")
                 return redirect("/")
             else:
                 messages.error(request, "자동 로그인에 실패했습니다. 로그인 페이지로 이동합니다.")
                 return redirect("/login/")
         else:
-            messages.error(request, "입력 정보를 다시 확인해주세요.")
+            pass
     else:
         user_form = RegisterForm()
         profile_form = ProfileForm()
@@ -54,16 +53,6 @@ login_view = LoginView.as_view(
 logout_view = LogoutView.as_view(next_page='/')
 
 
-# class ProfileCreateView(LoginRequiredMixin, CreateView):
-#     model = Profile
-#     form_class = ProfileForm
-
-#     def form_valid(self, form):
-#         form.instance.user = self.request.user
-#         messages.success(self.request, '프로필이 생성되었습니다.')
-#         return super().form_valid(form)
-    
-
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = Profile
@@ -75,7 +64,8 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     def get_object(self):
         profile, created = Profile.objects.get_or_create(user=self.request.user)
         if created:
-            messages.info(self.request, '프로필이 생성되었습니다.')
+            pass
+            # messages.info(self.request, '프로필이 생성되었습니다.')
         return profile
         
     def form_valid(self, form):
@@ -85,5 +75,5 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
                         
             self.object.upload_img = None
         
-        messages.success(self.request, '프로필이 수정되었습니다.')
+        # messages.success(self.request, '프로필이 수정되었습니다.')
         return super().form_valid(form)

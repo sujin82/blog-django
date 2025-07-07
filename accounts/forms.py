@@ -7,7 +7,7 @@ class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
     class Meta:
         model = User
-        fields = ('username', 'password1', 'password2', 'email')
+        fields = ['username', 'password1', 'password2', 'email']
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -24,4 +24,4 @@ class ProfileForm(forms.ModelForm):
     use_default_image = forms.BooleanField(required=False, widget=forms.HiddenInput())
     class Meta:
         model = Profile
-        fields = ['nickname', 'upload_img', 'birth_date']
+        fields = ['nickname', 'upload_img']
