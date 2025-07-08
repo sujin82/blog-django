@@ -21,7 +21,9 @@ main_page = ListView.as_view(
 
 # 블로그 게시글 목록
 post_list = ListView.as_view(
-    model=Post
+    model=Post,
+    template_name='index.html',
+    context_object_name='post_list',
 )
 
 

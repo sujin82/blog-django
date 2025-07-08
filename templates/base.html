@@ -44,47 +44,52 @@
     {% endblock %}
 </head>
 <body>
-  {% load static %}
-    <div id="wrapper" class="container py-3">
-      <header class="border-bottom pb-3 mb-3">
-      <!-- 1줄: 로고 + 중앙 검색창 + 우측 로그아웃 버튼 -->
-      <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
-          <!-- 로고 -->
-          {% block logo %}  
-          <h1 class="fs-4 mb-0"><a href="/" class="text-dark text-decoration-none">여행맛집로그</a></h1>
-          {% endblock %}
-          
+    {% load static %}
+        <div id="wrapper" class="container py-3">
+        <header class="border-bottom pb-3 mb-3">
+            {% block main_link %}
+            <div class="mb-2">
+                <a href="/" class="text-muted text-decoration-none fs-6">여행맛집로그</a>
+            </div>
+            <hr />
+            {% endblock %}
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+            <!-- 로고 -->
+            {% block logo %}  
+            <h1 class="fs-4 mb-0"><a href="/" class="text-dark text-decoration-none">여행맛집로그</a></h1>
+            {% endblock %}
+            
 
-          <!-- 중앙 검색 -->
-          {% block search %}
-          <form method="get" action="{% url 'blog:post_search' %}" class="mx-auto" style="max-width: 400px; flex-grow: 1;">
-              <div class="input-group">
-                  <input
-                      type="search"
-                      class="form-control rounded-start"
-                      placeholder="검색어를 입력하세요"
-                      aria-label="검색"
-                      name="q"
-                      value="{{ q|default:'' }}"
-                      style="border: 1px solid #ced4da;"
-                  />
-                  <button class="btn btn-outline-primary rounded-end" type="submit">
-                      <i class="bi bi-search"></i>
-                  </button>
-              </div>
-          </form>
-          {% endblock %}
+            <!-- 중앙 검색 -->
+            {% block search %}
+            <form method="get" action="{% url 'blog:post_search' %}" class="mx-auto" style="max-width: 400px; flex-grow: 1;">
+                <div class="input-group">
+                    <input
+                        type="search"
+                        class="form-control rounded-start"
+                        placeholder="검색어를 입력하세요"
+                        aria-label="검색"
+                        name="q"
+                        value="{{ q|default:'' }}"
+                        style="border: 1px solid #ced4da;"
+                    />
+                    <button class="btn btn-outline-primary rounded-end" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+            {% endblock %}
 
-          <!-- 우측 로그아웃 -->
-          {% if user.is_authenticated %}
-          <form method="post" action="{% url 'accounts:logout' %}" class="ms-3">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-outline-danger btn-sm">로그아웃</button>
-          </form>
-          {% endif %}
-      </div>
+            <!-- 우측 로그아웃 -->
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'accounts:logout' %}" class="ms-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm">로그아웃</button>
+            </form>
+            {% endif %}
+        </div>
 
-  </header>
+    </header>
 
         <main>
             {% block content %}

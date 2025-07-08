@@ -1,46 +1,98 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>my 블로그</title>
-</head>
-<body>
-    <h1>블로그 수정</h1>
-    
-</body>
-</html>
 
 {% extends 'base.html' %}
 
+{% load static %}
+{% block logo %}
+    <div class="fs-4 mb-0">
+        {% if user.profile.upload_img %}
+            <img src="{{ user.profile.upload_img.url }}" alt="프로필 이미지"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+        {% else %}
+            <img src="{% static 'images/default-profile.png' %}" alt="기본 프로필 이미지"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+        {% endif %}
+        <span><strong>{{ user.profile.display_name }}</strong>님의 블로그</span>
+    </div>
+{% endblock %}
+        
+
+{% block search %}
+    <form method="get" action="{% url 'blog:my_post_search' %}" class="mx-auto" style="max-width: 400px; flex-grow: 1;">
+        <div class="input-group">
+            <input
+                type="search"
+                class="form-control rounded-start"
+                placeholder="내 블로그 게시글 검색"
+                aria-label="검색"
+                name="q"
+                value="{{ q|default:'' }}"
+                style="border: 1px solid #ced4da;"
+            />
+            <button class="btn btn-outline-primary rounded-end" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </form>
+{% endblock %}
+
 {% block content %}
-    <h1>게시글 수정</h1>
-    <form action="" method="post" enctype="multipart/form-data" novalidate>
+<div class="container my-5" style="max-width: 720px;">
+    <h3 class="mb-4">
+        <i class="bi bi-pencil-square me-2"></i>게시글 수정
+    </h3>
+    <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-        <select name="category">
-            <option value="travel" {% if form.category.value == 'travel' %}selected{% endif %}>여행</option>
-            <option value="food" {% if form.category.value == 'food' %}selected{% endif %}>맛집</option>
-        </select>
 
-        <input type="text" name="title" placeholder="제목" value="{{ form.title.value|default_if_none:'' }}">
+        <!-- 카테고리 -->
+        <div class="mb-3">
+            <label for="category" class="form-label">카테고리</label>
+            <select name="category" id="category" class="form-select">
+                <option value="travel" {% if form.category.value == 'travel' %}selected{% endif %}>여행</option>
+                <option value="food" {% if form.category.value == 'food' %}selected{% endif %}>맛집</option>
+            </select>
+        </div>
 
-        <textarea name="content" placeholder="내용">{{ form.content.value|default_if_none:'' }}</textarea>
+        <!-- 제목 -->
+        <div class="mb-3">
+            <label for="title" class="form-label">제목</label>
+            <input type="text" name="title" id="title" class="form-control"
+                   placeholder="제목을 입력하세요"
+                   value="{{ form.title.value|default_if_none:'' }}" required>
+        </div>
 
+        <!-- 내용 -->
+        <div class="mb-3">
+            <label for="content" class="form-label">내용</label>
+            <textarea name="content" id="content" class="form-control" rows="6"
+                      placeholder="내용을 입력하세요" required>{{ form.content.value|default_if_none:'' }}</textarea>
+        </div>
+
+        <!-- 기존 이미지 미리보기 -->
         {% if form.instance.upload_img %}
-            <div>
-                <p>현재 이미지:</p>
-                <img src="{{ form.instance.upload_img.url }}" alt="현재 이미지" style="max-width: 200px; height: auto;">
-            </div>
+        <div class="mb-3">
+            <label class="form-label">기존 이미지</label><br>
+            <img src="{{ form.instance.upload_img.url }}" alt="기존 이미지" class="img-thumbnail"
+                 style="max-width: 200px;">
+        </div>
         {% endif %}
 
-        <input type="file" name="upload_img" accept="image/*">
+        <!-- 이미지 업로드 -->
+        <div class="mb-3">
+            <label for="upload_img" class="form-label">이미지 변경</label>
+            <input type="file" name="upload_img" id="upload_img" class="form-control" accept="image/*">
+        </div>
 
-        <label class="switch">
-            <input type="checkbox" name="ai_auto_reply" {% if form.ai_auto_reply.value %}checked{% endif %}>
-            <span class="slider round"></span>
-            AI 댓글 자동응답 켜기
-        </label>
-        
-        <button type="submit">작성완료</button>
+        <!-- AI 자동 댓글 응답 -->
+        <div class="form-check form-switch mb-4">
+            <input class="form-check-input" type="checkbox" id="ai_auto_reply" name="ai_auto_reply"
+                   {% if form.ai_auto_reply.value %}checked{% endif %}>
+            <label class="form-check-label" for="ai_auto_reply">AI 댓글 자동응답 켜기</label>
+        </div>
+
+        <!-- 제출 버튼 -->
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">수정 완료</button>
+        </div>
     </form>
+</div>
 {% endblock %}

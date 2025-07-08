@@ -1,57 +1,70 @@
 {% extends 'base.html' %}
 
+{% load static %}
+{% block logo %}
+    <div class="fs-4 mb-0">
+        {% if user.profile.upload_img %}
+            <img src="{{ user.profile.upload_img.url }}" alt="프로필 이미지"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+        {% else %}
+            <img src="{% static 'images/default-profile.png' %}" alt="기본 프로필 이미지"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+        {% endif %}
+        <span><strong>{{ user.profile.display_name }}</strong>님의 블로그</span>
+    </div>
+{% endblock %}
+        
+
+{% block search %}{% endblock %}
+
 
 {% block content %}
-    <h1>프로필 수정</h1>
-    <form action="" method="post" enctype="multipart/form-data" novalidate>
-        {% csrf_token %}
-        {% load static %}
+<form action="" method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {% load static %}
+    
+    <div class="form-section profile-section">
+        <h3 class="section-title mb-4">프로필 수정</h3>
         
-        <div class="form-section profile-section">
-            <h3 class="section-title">프로필 수정</h3>
-            
-            <!-- 현재 이미지 미리보기 -->
-            <div class="form-group">
-                <div class="current-image">
-                    {% if profile.upload_img %}
-                        <img id="profile-preview" src="{{ profile.upload_img.url }}" alt="프로필 이미지" style="width: 150px; height: 150px; border-radius: 50%;">
-                    {% else %}
-                        <img id="profile-preview" src="{% static 'images/default-profile.png' %}" alt="기본 프로필 이미지" style="width: 150px; height: 150px; border-radius: 50%;">
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="field-label" for="{{ form.upload_img.id_for_label }}">
-                    프로필 이미지
-                </label>
-                {{ form.upload_img }}
-                
-                <!-- 기본 이미지로 변경 버튼 -->
-                <button type="button" id="default-image-btn" style="background: none; border: none; color: #007bff; cursor: pointer; text-decoration: underline; margin-left: 10px;">
-                    기본 이미지로 변경
-                </button>
-            </div>
-            
-            <div class="form-group">
-                <label class="field-label" for="{{ form.nickname.id_for_label }}">
-                    닉네임
-                </label>
-                {{ form.nickname }}
-            </div>
+        <!-- 현재 이미지 미리보기 -->
+        <div class="mb-3 text-center">
+            {% if profile.upload_img %}
+                <img id="profile-preview" src="{{ profile.upload_img.url }}" alt="프로필 이미지" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+            {% else %}
+                <img id="profile-preview" src="{% static 'images/default-profile.png' %}" alt="기본 프로필 이미지" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+            {% endif %}
         </div>
         
-        <!-- 숨겨진 필드 -->
-        {{ form.use_default_image }}
-        
-        <!-- 버튼 영역 -->
-        <div class="form-actions">
-            <button type="submit" class="submit-btn">수정완료</button>
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.upload_img.id_for_label }}">
+                프로필 이미지
+            </label>
+            {{ form.upload_img }}
+            
+            <button type="button" id="default-image-btn" class="btn btn-link p-0 mt-1">
+                기본 이미지로 변경
+            </button>
         </div>
-    </form>
+        
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.nickname.id_for_label }}">
+                닉네임
+            </label>
+            {{ form.nickname }}
+        </div>
+    </div>
+    
+    <!-- 숨겨진 필드 -->
+    {{ form.use_default_image }}
+    
+    <!-- 버튼 영역 -->
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary">수정완료</button>
+    </div>
+</form>
 
-    <script>
-        document.getElementById('default-image-btn').addEventListener('click', function() {
+<script>
+    document.getElementById('default-image-btn').addEventListener('click', function() {
         // 미리보기를 기본 이미지로 변경
         document.getElementById('profile-preview').src = '{% static "images/default-profile.png" %}';
         
@@ -61,5 +74,5 @@
         // 파일 업로드 필드 초기화
         document.getElementById('id_upload_img').value = '';
     });
-    </script>
+</script>
 {% endblock %}

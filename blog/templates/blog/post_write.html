@@ -1,24 +1,86 @@
 {% extends 'base.html' %}
 
-{% block content %}
-    <h1>글쓰기</h1>
-    <form action="" method="post" enctype="multipart/form-data" novalidate>
-        {% csrf_token %}
-        <select name="category">
-            <option value="travel">여행</option>
-            <option value="food">맛집</option>
-        </select>
-        <input type="text" name="title" placeholder="제목">
-        <textarea name="content" placeholder="내용"></textarea>
-        <input type="file" name="upload_img" accept="image/*">
-
-        <label class="switch">
-            <input type="checkbox" name="ai_auto_reply" {% if form.ai_auto_reply.value %}checked{% endif %}>
-            <span class="slider round"></span>
-            AI 댓글 자동응답 켜기
-        </label>
+{% load static %}
+{% block logo %}
+    <div class="fs-4 mb-0">
+        {% if user.profile.upload_img %}
+            <img src="{{ user.profile.upload_img.url }}" alt="프로필 이미지"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+        {% else %}
+            <img src="{% static 'images/default-profile.png' %}" alt="기본 프로필 이미지"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+        {% endif %}
+        <span><strong>{{ user.profile.display_name }}</strong>님의 블로그</span>
+    </div>
+{% endblock %}
         
-        <button type="submit">작성완료</button>
+
+{% block search %}
+    <form method="get" action="{% url 'blog:my_post_search' %}" class="mx-auto" style="max-width: 400px; flex-grow: 1;">
+        <div class="input-group">
+            <input
+                type="search"
+                class="form-control rounded-start"
+                placeholder="내 블로그 게시글 검색"
+                aria-label="검색"
+                name="q"
+                value="{{ q|default:'' }}"
+                style="border: 1px solid #ced4da;"
+            />
+            <button class="btn btn-outline-primary rounded-end" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
     </form>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5" style="max-width: 720px;">
+    <h3 class="mb-4">
+        <i class="bi bi-pencil-square me-2"></i>글쓰기
+    </h3>
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <!-- 카테고리 -->
+        <div class="mb-3">
+            <label for="category" class="form-label">카테고리</label>
+            <select name="category" id="category" class="form-select">
+                <option value="travel">여행</option>
+                <option value="food">맛집</option>
+            </select>
+        </div>
+
+        <!-- 제목 -->
+        <div class="mb-3">
+            <label for="title" class="form-label">제목</label>
+            <input type="text" name="title" id="title" class="form-control" placeholder="제목을 입력하세요" required>
+        </div>
+
+        <!-- 내용 -->
+        <div class="mb-3">
+            <label for="content" class="form-label">내용</label>
+            <textarea name="content" id="content" class="form-control" rows="6" placeholder="내용을 입력하세요" required></textarea>
+        </div>
+
+        <!-- 이미지 업로드 -->
+        <div class="mb-3">
+            <label for="upload_img" class="form-label">이미지 첨부</label>
+            <input type="file" name="upload_img" id="upload_img" class="form-control" accept="image/*">
+        </div>
+
+        <!-- AI 자동 댓글 응답 -->
+        <div class="form-check form-switch mb-4">
+            <input class="form-check-input" type="checkbox" id="ai_auto_reply" name="ai_auto_reply" 
+                {% if form.ai_auto_reply.value %}checked{% endif %}>
+            <label class="form-check-label" for="ai_auto_reply">AI 댓글 자동응답 켜기</label>
+        </div>
+
+        <!-- 제출 버튼 -->
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">작성 완료</button>
+        </div>
+    </form>
+</div>
 {% endblock %}
 
