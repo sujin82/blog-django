@@ -2,16 +2,30 @@
 
 {% load static %}
 {% block logo %}
-    <div class="fs-4 mb-0">
-        {% if user.profile.upload_img %}
-            <img src="{{ user.profile.upload_img.url }}" alt="프로필 이미지"
-                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-        {% else %}
-            <img src="{% static 'images/default-profile.png' %}" alt="기본 프로필 이미지"
-                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-        {% endif %}
-        <span><strong>{{ user.profile.display_name }}</strong>님의 블로그</span>
-    </div>
+    {% if user.is_authenticated %}
+        <div class="fs-4 mb-0 d-flex align-items-center gap-2">
+            {% if user.profile.upload_img %}
+                <img src="{{ user.profile.upload_img.url }}" alt="프로필 이미지"
+                    style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+            {% else %}
+                <img src="{% static 'images/default-profile.png' %}" alt="기본 프로필 이미지"
+                    style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+            {% endif %}
+            <a href="{% url 'blog:my_posts' %}">
+                <span><strong>{{ user.profile.display_name }}</strong>님의 블로그</span>
+            </a>
+        </div>
+    {% else %}
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <h1 class="fs-4 mb-0">
+                <a href="/" class="text-dark text-decoration-none">여행맛집로그</a>
+            </h1>
+            <div class="d-flex gap-3">
+                <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-sm">로그인</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-outline-primary btn-sm">회원가입</a>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
         
 
@@ -19,7 +33,7 @@
 
 
 {% block content %}
-<form action="" method="post" enctype="multipart/form-data" novalidate>
+<form action="" method="post" enctype="multipart/form-data" novalidate class="container my-4">
     {% csrf_token %}
     {% load static %}
     
