@@ -1,167 +1,160 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>회원가입</title>
-    <style>
-        /* 기본 스타일 예시 */
-        .register-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .register-form {
-            background: #f9f9f9;
-            padding: 30px;
-            border-radius: 8px;
-        }
-        
-        .form-section {
-            margin-bottom: 30px;
-        }
-        
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .field-label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #555;
-        }
-        
-        .field-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .field-help {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-        
-        .field-error {
-            color: #d32f2f;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-        
-        .form-actions {
-            text-align: center;
-            margin-top: 30px;
-        }
-        
-        .submit-btn {
-            background: #007bff;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        
-        .submit-btn:hover {
-            background: #0056b3;
-        }
-    </style>
-</head>
-<body>
-    
+{% extends "base.html" %}
 
-    <div class="register-container">
-        <div class="register-form">
-            <h2 class="form-title">회원가입</h2>
-            
-            <form action="" method="post" enctype="multipart/form-data" novalidate>
-                {% csrf_token %}
-                
-                <!-- 계정 정보 섹션 -->
-                <div class="form-section account-section">
-                    <h3 class="section-title">가입 필수 정보</h3>
-                    
-                    <div class="form-group">
-                        <label class="field-label" for="{{ user_form.username.id_for_label }}">
-                            아이디
-                        </label>
-                        {{ user_form.username }}
-                        {% for error in user_form.username.errors %}
-                            <p class="error-text">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                    <div class="form-group">
-                        <label class="field-label" for="{{ user_form.password1.id_for_label }}">
-                            비밀번호
-                        </label>
-                        {{ user_form.password1 }}
-                        {% for error in user_form.password1.errors %}
-                            <p class="error-text">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="field-label" for="{{ user_form.password2.id_for_label }}">
-                            비밀번호 확인
-                        </label>
-                        {{ user_form.password2 }}
-                        {% for error in user_form.password2.errors %}
-                            <p class="error-text">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                    <div class="form-group">
-                        <label class="field-label" for="{{ user_form.email.id_for_label }}">
-                            이메일
-                        </label>
-                        {{ user_form.email }}
-                        {% for error in user_form.email.errors %}
-                            <p class="error-text">{{ error }}</p>
-                        {% endfor %}
-                    </div>
+{% block title %}회원가입 | 여행맛집로그{% endblock %}
+
+{% block content %}
+<style>
+    .register-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .register-form {
+        background: #f9f9f9;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 8px rgba(0,0,0,0.05);
+    }
+
+    .form-title {
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #333;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .field-label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #555;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .error-text {
+        color: #d32f2f;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .form-actions {
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    .submit-btn {
+        background: #007bff;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .submit-btn:hover {
+        background: #0056b3;
+    }
+</style>
+
+<div class="register-container">
+    <div class="register-form">
+        <h2 class="form-title">회원가입</h2>
+        <form action="" method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <!-- 가입 필수 정보 -->
+            <div class="form-section account-section">
+                <h3 class="section-title">가입 필수 정보</h3>
+
+                <div class="form-group">
+                    <label class="field-label" for="{{ user_form.username.id_for_label }}">아이디</label>
+                    {{ user_form.username }}
+                    {% for error in user_form.username.errors %}
+                        <p class="error-text">{{ error }}</p>
+                    {% endfor %}
                 </div>
-                
-                <!-- 프로필 정보 섹션 -->
-                <div class="form-section profile-section">
-                    <h3 class="section-title">프로필 정보(선택)</h3>
-                    <div class="form-group">
-                        <label class="field-label" for="{{ profile_form.upload_img.id_for_label }}">
-                            프로필 이미지
-                        </label>
-                        {{ profile_form.upload_img }}
-                        {% for error in profile_form.upload_img.errors %}
-                            <p class="error-text">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                    <div class="form-group">
-                        <label class="field-label" for="{{ profile_form.nickname.id_for_label }}">
-                            닉네임
-                        </label>
-                        {{ profile_form.nickname }}
-                        {% for error in profile_form.nickname.errors %}
-                            <p class="error-text">{{ error }}</p>
-                        {% endfor %}
-                    </div>
+
+                <div class="form-group">
+                    <label class="field-label" for="{{ user_form.password1.id_for_label }}">비밀번호</label>
+                    {{ user_form.password1 }}
+                    {% for error in user_form.password1.errors %}
+                        <p class="error-text">{{ error }}</p>
+                    {% endfor %}
                 </div>
-                
-                <!-- 버튼 영역 -->
-                <div class="form-actions">
-                    <button type="submit" class="submit-btn">가입하기</button>
+
+                <div class="form-group">
+                    <label class="field-label" for="{{ user_form.password2.id_for_label }}">비밀번호 확인</label>
+                    {{ user_form.password2 }}
+                    {% for error in user_form.password2.errors %}
+                        <p class="error-text">{{ error }}</p>
+                    {% endfor %}
                 </div>
-            </form>
-        </div>
+
+                <div class="form-group">
+                    <label class="field-label" for="{{ user_form.email.id_for_label }}">이메일</label>
+                    {{ user_form.email }}
+                    {% for error in user_form.email.errors %}
+                        <p class="error-text">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 프로필 정보 -->
+            <div class="form-section profile-section">
+                <h3 class="section-title">프로필 정보(선택)</h3>
+
+                <div class="form-group">
+                    <label class="field-label" for="{{ profile_form.upload_img.id_for_label }}">프로필 이미지</label>
+                    {{ profile_form.upload_img }}
+                    {% for error in profile_form.upload_img.errors %}
+                        <p class="error-text">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label class="field-label" for="{{ profile_form.nickname.id_for_label }}">닉네임</label>
+                    {{ profile_form.nickname }}
+                    {% for error in profile_form.nickname.errors %}
+                        <p class="error-text">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 버튼 -->
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">가입하기</button>
+            </div>
+        </form>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

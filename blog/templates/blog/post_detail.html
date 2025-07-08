@@ -1,225 +1,363 @@
 {% extends 'base.html' %}
 
 {% block title %} {{ post.author }}의 블로그 {% endblock %}
+{% block style %}
+<style>
+    .post-nav-label {
+        font-size: 14px;
+        color: #666;
+        font-weight: bold;
+        width: 60px;
+    }
+    .post-nav-title {
+        font-size: 14px;
+        color: #666;
+    }
+    .post-nav-title a {
+        text-decoration: none;
+        color: inherit;
+    }
+    .post-nav-title a:hover {
+        text-decoration: underline;
+    }
+    .post-nav-title.current {
+        color: #333;
+        font-weight: bold;
+    }
+
+    .meta-box {
+        background-color: #f8f9fa;
+        padding: 2rem 1.5rem;
+        border-radius: 10px;
+        margin: 2rem 0;
+    }
+
+    .edit-comment-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.edit-textarea {
+    flex-grow: 1;
+    padding-right: 90px; /* 버튼 영역 확보 */
+    resize: vertical;
+}
+
+.edit-btn-group {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 8px;
+}
+
+.edit-btn-group button {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.edit-btn-group .btn-save {
+    color: #0d6efd; /* 부트스트랩 기본 파란색 */
+    font-weight: 600;
+}
+
+.edit-btn-group .btn-cancel {
+    color: #6c757d; /* 회색 */
+}
+</style>
+{% endblock %}
+
+{% load static %}
+{% block logo %}
+    <div class="fs-4 mb-0">
+        {% if user.profile.upload_img %}
+            <img src="{{ user.profile.upload_img.url }}" alt="프로필 이미지"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+        {% else %}
+            <img src="{% static 'images/default-profile.png' %}" alt="기본 프로필 이미지"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+        {% endif %}
+        <a href="{% url 'blog:my_posts' %}">
+            <span><strong>{{ user.profile.display_name }}</strong>님의 블로그</span>
+        </a>
+    </div>
+{% endblock %}
+        
+
+{% block search %}{% endblock %}
 
 {% block content %}
-    {% csrf_token %}
-    
-    <div>
-        <h1>{{ post.title }}</h1>
-        <p>조회수 {{ post.view_count }}</p>
-        <p>{{ post.content|linebreaks }}</p>
+<div class="container my-4 position-relative">
+
+    <!-- 게시글 상단 정보 박스 -->
+    <div class="meta-box">
+        <!-- 제목 -->
+        <h1 class="mb-3">{{ post.title }}</h1>
+
+        <!-- 작성자 + 작성일 -->
+        <p class="card-text text-muted mb-1">
+            작성자: {{ post.author.username }} &nbsp; | &nbsp;
+            작성일: {{ post.created_at|date:"Y-m-d" }}
+        </p>
+
+        <!-- 조회수 + 좋아요 -->
+        <p class="card-text text-muted mb-2 d-flex gap-3 align-items-center">
+            <span class="d-flex align-items-center">
+                <i class="bi bi-eye me-1"></i> {{ post.view_count }}
+            </span>
+            <span class="d-flex align-items-center">
+                <i class="bi bi-hand-thumbs-up me-1"></i> {{ post.like_set.count }}
+            </span>
+        </p>
     </div>
 
-    {% if post.upload_img %}
-        <div class="post-image">
-            <img src="{{ post.upload_img.url }}" alt="게시글 이미지" class="img-fluid">
+    <!-- 게시글 본문 -->
+    <div class="mb-4">
+        <p class="fs-5" style="white-space: pre-wrap;">{{ post.content }}</p>
+
+        {% if post.upload_img %}
+        <div class="text-center my-3">
+            <img src="{{ post.upload_img.url }}" alt="게시글 이미지" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
         </div>
-    {% endif %}
-
-    <div class="like-section"><!-- 좋아요 -->
-        <button class="like-btn" 
-            data-post-id="{{ post.id }}"
-            {% if not user.is_authenticated %}
-                data-action="login-required"
-            {% elif user == post.author %}
-                data-action="own-post"
-                disabled
-            {% else %}
-                data-action="toggle-like"
-            {% endif %}
-        >
-            <img class="like-img" src="/static/images/free-icon-like-symbol-5881205.png" alt="좋아요">
-            <span class="like-count">{{ post.like_set.count }}</span>개
-        </button>
+        {% endif %}
     </div>
 
-    
+    <!-- 수정 / 삭제 버튼 -->
     {% if request.user.is_authenticated and request.user == post.author %}
-    <div>
-        <!-- 수정 버튼 -->
-        <a href="{% url 'blog:post_edit' post.pk %}">수정하기</a>
-
-        <!-- 삭제 버튼 -->
-        <form action="{% url 'blog:post_delete' post.pk %}" method="post">
+    <div class="text-end mb-5">
+        <a href="{% url 'blog:post_edit' post.pk %}" class="btn btn-outline-primary btn-sm me-2">수정</a>
+        <form action="{% url 'blog:post_delete' post.pk %}" method="post" class="d-inline">
             {% csrf_token %}
-            <button type="submit">삭제하기</button>
+            <button type="submit" class="btn btn-outline-danger btn-sm">삭제</button>
         </form>
     </div>
     {% endif %}
+</div>
 
-    <hr />
+<hr>
 
-    <!-- 이전/다음 게시글 네비게이션 -->
-    <div class="post-navigation">
-        <div class="nav-item">
+<div class="mb-4">
+    <!-- 이전글 -->
+    <div class="d-flex mb-2">
+        <div class="post-nav-label">이전글</div>
+        <div class="post-nav-title">
             {% if prev_post %}
                 <a href="{% url 'blog:post_detail' prev_post.pk %}">
-                    이전글: {{ prev_post.title }}
+                    {{ prev_post.title }}
                 </a>
             {% else %}
-                <span class="disabled">이전글이 없습니다</span>
-            {% endif %}
-        </div>
-
-        <div class="nav-item current">
-            <span class="current-post">현재글: {{ post.title }}</span>
-        </div>
-        
-        <div class="nav-item">
-            {% if next_post %}
-                <a href="{% url 'blog:post_detail' next_post.pk %}">
-                    다음글: {{ next_post.title }}
-                </a>
-            {% else %}
-                <span class="disabled">다음글이 없습니다</span>
+                <span class="text-muted">이전글이 없습니다</span>
             {% endif %}
         </div>
     </div>
 
-
-    <hr />
-    <!-- 댓글 목록 -->
-    <h3>댓글 ({{ comments.count }}개)</h3>
-    {% for comment in comments %}
-        <div id="comment-{{ comment.id }}">
-            <strong>{{ comment.author.username }}</strong>
-            <small>{{ comment.created_at|date:"Y-m-d H:i" }}</small>
-            <div class="comment-content">
-                <span>{{ comment.content|linebreaks }}</span>
-            
-                {% if comment.author == user %}
-                    <button onclick="editComment({{ comment.id }})">수정</button>
-                    <button onclick="deleteComment({{ comment.id }})">삭제</button>
-                {% endif %}
-            </div>
+    <!-- 현재글 -->
+    <div class="d-flex mb-2">
+        <div class="post-nav-label">현재글</div>
+        <div class="post-nav-title current">
+            {{ post.title }}
         </div>
-    {% empty %}
-        <p>댓글이 아직 없습니다.</p>
+    </div>
+
+    <!-- 다음글 -->
+    <div class="d-flex">
+        <div class="post-nav-label">다음글</div>
+        <div class="post-nav-title">
+            {% if next_post %}
+                <a href="{% url 'blog:post_detail' next_post.pk %}">
+                    {{ next_post.title }}
+                </a>
+            {% else %}
+                <span class="text-muted">다음글이 없습니다</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<!-- 댓글 목록 -->
+<h5 class="mb-3 d-flex align-items-center" style="font-size: 1rem; font-weight: 600; color: #333;">
+    <i class="bi bi-chat-left-text me-2" style="font-size: 1.2rem;"></i> 댓글 {{ comments.count }}
+</h5>
+
+<!-- 댓글 작성 폼 -->
+{% if user.is_authenticated %}
+<form method="post" class="mb-4 position-relative">
+    {% csrf_token %}
+    <textarea name="content" class="form-control pe-5" rows="3" placeholder="댓글을 입력하세요" required style="resize:none;"></textarea>
+
+    <button type="submit" class="btn btn-primary position-absolute" 
+        style="top: 50%; right: 12px; transform: translateY(-50%); border-radius: 50%; width: 38px; height: 38px; padding: 0;">
+        <i class="bi bi-send-fill" style="font-size: 1.2rem; color: white;"></i>
+    </button>
+</form>
+{% else %}
+<p><a href="{% url 'accounts:login' %}">로그인</a> 후 댓글 작성이 가능합니다.</p>
+{% endif %}
+
+<!-- 댓글 리스트 -->
+{% if comments %}
+<ul class="list-group mb-4">
+    {% for comment in comments %}
+    <li class="list-group-item" id="comment-{{ comment.id }}" style="background-color: #f8f9fa;">
+        <div class="d-flex justify-content-between align-items-center mb-2" style="font-size: 0.875rem; color: #555;">
+            <div>
+                <strong>{{ comment.author.username }}</strong> <span class="text-muted">|</span> <small class="text-muted">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
+            </div>
+            {% if comment.author == user %}
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary p-1" onclick="editComment({{ comment.id }})" title="수정">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger p-1" onclick="deleteComment({{ comment.id }})" title="삭제">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        <div class="comment-content" style="white-space: pre-wrap; font-size: 0.95rem; color: #333;">
+            {{ comment.content }}
+        </div>
+    </li>
     {% endfor %}
+</ul>
+{% else %}
+<p>댓글이 아직 없습니다.</p>
+{% endif %}
 
-    <!-- 댓글 작성 폼 -->
-    {% if user.is_authenticated %}
-        <form method="post">
-            {% csrf_token %}
-            <textarea name="content" placeholder="댓글을 입력하세요" required></textarea><br>
-            <button type="submit">댓글 작성</button>
-        </form>
-    {% else %}
-        <p><a href="{% url 'accounts:login' %}">로그인</a>후 댓글 작성이 가능합니다.</p>
-    {% endif %}
+</div>
 
-    <script>
-        // 좋아요
-        const likeBtn = document.querySelector('.like-btn');
-        if (likeBtn) {
-            likeBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const action = this.getAttribute('data-action');
-                const postId = this.getAttribute('data-post-id');
-                
-                // 비로그인 사용자
-                if (action === 'login-required') {
-                    alert('좋아요를 누르려면 로그인이 필요합니다.');
-                    // window.location.href = '/accounts/login/';
-                    // return;
-                }
-                
-                // 작성자 본인
-                if (action === 'own-post') {
-                    alert('본인이 작성한 게시글에는 좋아요를 누를 수 없습니다.');
-                    // return;
-                }
-                
-                // 정상적인 좋아요 처리
-                if (action === 'toggle-like') {
-                    fetch(`/blog/${postId}/like/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            alert(data.error);
-                            return;
-                        }
-                        
-                        const img = document.querySelector('.like-img');
-                        const count = document.querySelector('.like-count');
-                        
-                        if (img && count) {
-                            if (data.liked) {
-                                img.src = '/static/images/free-icon-like-6924834.png';
-                            } else {
-                                img.src = '/static/images/free-icon-like-symbol-5881205.png';
-                            }
-                            count.textContent = data.likes_count;
-                        }
-                    });
-                }
-            });
-        }
+<script>
+    const csrftoken = '{{ csrf_token }}';
 
-
-        // 댓글 수정&삭제하기
-        function editComment(commentId) {   // 수정모드
-            const commentDiv = document.getElementById(`comment-${commentId}`);
-            const content = commentDiv.querySelector('.comment-content p').textContent.trim();
+    // 좋아요 처리
+    const likeBtn = document.querySelector('.like-btn');
+    if (likeBtn) {
+        likeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
             
-            commentDiv.querySelector('.comment-content').innerHTML = `
-                <textarea id="edit-${commentId}">${content}</textarea>
-                <button onclick="saveComment(${commentId})">저장</button>
-                <button onclick="location.reload()">취소</button>
-            `;
-        }
-
-
-        function saveComment(commentId) {
-            const content = document.getElementById(`edit-${commentId}`).value;
+            const action = this.getAttribute('data-action');
+            const postId = this.getAttribute('data-post-id');
             
-            fetch(`/blog/{{ post.pk }}/comments/edit/`, {
+            if (action === 'login-required') {
+                alert('좋아요를 누르려면 로그인이 필요합니다.');
+            }
+            
+            if (action === 'own-post') {
+                alert('본인이 작성한 게시글에는 좋아요를 누를 수 없습니다.');
+            }
+            
+            if (action === 'toggle-like') {
+                fetch(`/blog/${postId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    
+                    const img = document.querySelector('.like-img');
+                    const count = document.querySelector('.like-count');
+                    
+                    if (img && count) {
+                        if (data.liked) {
+                            img.src = '/static/images/free-icon-like-6924834.png';
+                        } else {
+                            img.src = '/static/images/free-icon-like-symbol-5881205.png';
+                        }
+                        count.textContent = data.likes_count;
+                    }
+                });
+            }
+        });
+    }
+
+    // 댓글 수정 모드
+    function editComment(commentId) {
+        const commentDiv = document.getElementById(`comment-${commentId}`);
+        const content = commentDiv.querySelector('.comment-content').textContent.trim();
+
+        commentDiv.querySelector('.comment-content').innerHTML = `
+            <div class="edit-comment-wrapper">
+                <textarea id="edit-${commentId}" class="edit-textarea" rows="3">${content}</textarea>
+                <div class="edit-btn-group">
+                    <button class="btn-save" onclick="saveComment(${commentId})">저장</button>
+                    <button class="btn-cancel" onclick="location.reload()">취소</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // 댓글 수정 저장
+    function saveComment(commentId) {
+        const content = document.getElementById(`edit-${commentId}`).value;
+
+        fetch(`/blog/{{ post.pk }}/comments/edit/`, {
+            method: 'POST',
+            body: JSON.stringify({
+                comment_id: commentId,
+                content: content
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('서버 응답 오류');
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            location.reload();
+        })
+        .catch(error => {
+            console.error('에러:', error);
+            alert('댓글 수정 중 오류가 발생했습니다.');
+        });
+    }
+
+    // 댓글 삭제
+    function deleteComment(commentId) {
+        if(confirm('댓글을 삭제하시겠습니까?')) {
+            fetch(`/blog/{{ post.pk }}/comments/delete/`, {
                 method: 'POST',
-                body: JSON.stringify({
-                    comment_id: commentId,
-                    content: content
-                }),
+                body: JSON.stringify({ comment_id: commentId }),
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
+                    'X-CSRFToken': csrftoken
                 }
             })
             .then(response => {
-                console.log('응답 상태:', response.status);  // 디버깅용
+                if (!response.ok) throw new Error('서버 응답 오류');
                 return response.json();
             })
             .then(data => {
-                console.log('응답 데이터:', data);  // 디버깅용
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
                 location.reload();
             })
             .catch(error => {
-                console.error('에러:', error);  // 디버깅용
+                console.error('에러:', error);
+                alert('댓글 삭제 중 오류가 발생했습니다.');
             });
         }
-
-        function deleteComment(commentId) {
-            if(confirm('댓글을 삭제하시겠습니까?')) {
-                fetch(`/blog/{{ post.pk }}/comments/delete/`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        comment_id: commentId
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    }
-                })
-                .then(() => location.reload());
-            }
-        } 
-    </script>
+    }
+</script>
 {% endblock %}
-
-

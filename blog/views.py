@@ -126,7 +126,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 
-# 게시글 검색 기능(FBV) : 검색(검색 필드 폼 활용), 카테고리 선택(탭 디자인)
+# 게시글 검색 기능 : 검색(검색 필드 폼 활용), 카테고리 선택(탭 디자인)
 class PostSearchView(ListView):
     model = Post
     template_name = "blog/post_search.html"
@@ -144,8 +144,29 @@ class PostSearchView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['q'] = self.request.GET.get('q', '')
+        context["is_my_post"] = False
         return context
 
+
+# 게시글 검색 : 내 게시글 목록에서만
+class MyPostSearchView(LoginRequiredMixin, ListView):
+    model = Post
+    template_name = 'blog/post_search.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        q = self.request.GET.get("q", "")
+        return Post.objects.filter(
+            Q(author=self.request.user),
+            Q(title__icontains=q) | Q(content__icontains=q)
+        ).order_by("-created_at")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["q"] = self.request.GET.get("q", "")
+        context["is_my_post"] = True
+        return context
 
 
 
