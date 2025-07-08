@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView 
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views import View
@@ -13,8 +13,10 @@ import json
 
 
 # 메인 뷰 : TemplateView로 시작해서 기능을 추가하면서 커스텀 뷰 클래스로 전환 계획
-main_page = TemplateView.as_view(
-    template_name='index.html'
+main_page = ListView.as_view(
+    model=Post,
+    template_name='index.html',
+    context_object_name='post_list',
 )
 
 # 블로그 게시글 목록

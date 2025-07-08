@@ -1,14 +1,74 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>로그인</h1>
-    <form action="" method="post" novalidate>
-        {% csrf_token %}
-
-        <table>
-            {{ form.as_table }}
-        </table>
-
-        <button type="submit">로그인</button>
-    </form>
+{% block search %}{% endblock %}
+{% block user_nav %}{% endblock %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title mb-4 text-center">로그인</h2>
+                    
+                    <!-- 전체 폼 에러 메시지 -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <form action="" method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                        <div class="mb-3">
+                            {% if field.name == 'username' %}
+                                <input type="text" 
+                                       class="form-control {% if field.errors %}is-invalid{% endif %}" 
+                                       name="{{ field.name }}" 
+                                       id="{{ field.id_for_label }}" 
+                                       value="{{ field.value|default:'' }}"
+                                       placeholder="사용자명을 입력하세요"
+                                       required>
+                            {% elif field.name == 'password' %}
+                                <input type="password" 
+                                       class="form-control {% if field.errors %}is-invalid{% endif %}" 
+                                       name="{{ field.name }}" 
+                                       id="{{ field.id_for_label }}"
+                                       placeholder="비밀번호를 입력하세요"
+                                       required>
+                            {% else %}
+                                <!-- 기타 필드들을 위한 처리 -->
+                                <div class="form-control {% if field.errors %}is-invalid{% endif %}">
+                                    {{ field }}
+                                </div>
+                            {% endif %}
+                            
+                            {% if field.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in field.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">로그인</button>
+                        </div>
+                    </form>
+                    
+                    <!-- 회원가입 링크 -->
+                    <div class="text-center mt-3">
+                        <p class="text-muted">아직 계정이 없으신가요?</p>
+                        <a href="{% url 'accounts:register' %}" class="btn btn-outline-secondary">회원가입</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
