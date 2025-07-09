@@ -71,26 +71,9 @@
 }
 
 .btn-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid #c2c2c2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s, transform 0.2s;
+    border: 0 none;
     cursor: pointer;
-    background-color:#fff;
-}
-
-.btn-icon:hover {
-    background-color: #e2e6ea;
-    transform: scale(1.1);
-}
-
-.btn-icon:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    background-color: #f8f9fa;
 }
 </style>
 {% endblock %}
@@ -144,8 +127,10 @@
 
     <!-- 게시글 상단 정보 박스 -->
     <div class="meta-box position-relative">
-    <!-- 좋아요 버튼: 우측 상단 고정 -->
-        <button class="like-btn btn-icon position-absolute bottom-0 end-0 mt-2 me-2" style="margin-bottom:10px;"
+
+
+    <div class="like-section position-absolute bottom-0 end-0 mt-2 me-2">
+        <button class="like-btn btn-icon" 
             data-post-id="{{ post.id }}"
             {% if not user.is_authenticated %}
                 data-action="login-required"
@@ -156,8 +141,13 @@
                 data-action="toggle-like"
             {% endif %}
         >
-            <i class="bi {% if user in post.like_set.all %}bi-heart-fill{% else %}bi-heart{% endif %} fs-5 text-danger like-icon"></i>
+            <img class="like-img" 
+                src="{% if user_liked %}/static/images/free-icon-like-6924834.png{% else %}/static/images/free-icon-like-symbol-5881205.png{% endif %}" 
+                alt="좋아요">
+            <span class="like-count"></span>
         </button>
+    </div>
+
 
         <!-- 제목 -->
         <h1 class="mb-3">{{ post.title }}</h1>
@@ -174,7 +164,8 @@
                 <i class="bi bi-eye me-1"></i> {{ post.view_count }}
             </span>
             <span class="d-flex align-items-center">
-                <i class="bi bi-heart me-1"></i> {{ post.like_set.count }}
+                <i class="bi bi-heart me-1"></i>
+                <span class="post-like-count">{{ post.like_set.count }}</span>
             </span>
         </p>
     </div>
@@ -297,58 +288,96 @@
 </div>
 
 <script>
-    const csrftoken = '{{ csrf_token }}';
+    document.addEventListener('DOMContentLoaded', function() {
+    const likeBtn = document.querySelector('.like-btn');
+    
+    if (likeBtn) {
+        console.log('좋아요 버튼 찾음:', likeBtn); // 디버깅용
+        
+        likeBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            console.log('좋아요 버튼 클릭됨'); // 디버깅용
 
-// 좋아요 처리
-const likeBtn = document.querySelector('.like-btn');
-if (likeBtn) {
-    likeBtn.addEventListener('click', function(e) {
-        e.preventDefault();
+            const action = this.getAttribute('data-action');
+            const postId = this.getAttribute('data-post-id');
+            
+            console.log('Action:', action, 'Post ID:', postId); // 디버깅용
 
-        const action = this.getAttribute('data-action');
-        const postId = this.getAttribute('data-post-id');
+            if (action === 'login-required') {
+                alert('좋아요를 누르려면 로그인이 필요합니다.');
+                return;
+            }
 
-        if (action === 'login-required') {
-            alert('좋아요를 누르려면 로그인이 필요합니다.');
-            return;
-        }
+            if (action === 'own-post') {
+                alert('본인이 작성한 게시글에는 좋아요를 누를 수 없습니다.');
+                return;
+            }
 
-        if (action === 'own-post') {
-            alert('본인이 작성한 게시글에는 좋아요를 누를 수 없습니다.');
-            return;
-        }
-
-        if (action === 'toggle-like') {
-            fetch(`/blog/${postId}/like/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken
+            if (action === 'toggle-like') {
+                // CSRF 토큰 가져오기 (여러 방법 시도)
+                let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+                if (!csrfToken) {
+                    csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                    return;
+                if (!csrfToken) {
+                    csrfToken = '{{ csrf_token }}';
                 }
-
-                const icon = document.querySelector('.like-icon');
-                const count = document.querySelector('.like-count');
-
-                if (icon && count) {
-                    if (data.liked) {
-                        icon.classList.remove('bi-heart');
-                        icon.classList.add('bi-heart-fill');
-                    } else {
-                        icon.classList.remove('bi-heart-fill');
-                        icon.classList.add('bi-heart');
+                
+                console.log('CSRF Token:', csrfToken); // 디버깅용
+                
+                fetch(`/blog/${postId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin' // 중요: 쿠키 포함
+                })
+                .then(response => {
+                    console.log('응답 상태:', response.status); // 디버깅용
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    count.textContent = data.likes_count;
-                }
-            });
-        }
-    });
-}
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('응답 데이터:', data); // 디버깅용
+                    
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    // 이미지와 카운트 업데이트
+                    const img = this.querySelector('.like-img');
+                    const count = this.querySelector('.like-count');
+
+                    if (img && count) {
+                        if (data.liked) {
+                            img.src = '/static/images/free-icon-like-6924834.png'; // 채워진 하트
+                        } else {
+                            img.src = '/static/images/free-icon-like-symbol-5881205.png'; // 빈 하트
+                        }
+                        const postLikeCount = document.querySelector('.post-like-count');
+                        if (postLikeCount) {
+                            postLikeCount.textContent = data.likes_count;
+                        };
+                        console.log('UI 업데이트 완료'); // 디버깅용
+                    } else {
+                        console.error('이미지 또는 카운트 요소를 찾을 수 없음'); // 디버깅용
+                    }
+                })
+                .catch(error => {
+                    console.error('좋아요 요청 오류:', error);
+                    alert('좋아요 처리 중 오류가 발생했습니다.');
+                });
+            }
+        });
+    } else {
+        console.error('좋아요 버튼을 찾을 수 없음'); // 디버깅용
+    }
+});
+
 
     // 댓글 수정 모드
     function editComment(commentId) {

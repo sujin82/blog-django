@@ -31,19 +31,25 @@ post_list = ListView.as_view(
 def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
     is_my_post = request.user.is_authenticated and (request.user == post.author)
-
+    
+    # 현재 사용자가 이 게시글에 좋아요를 눌렀는지 확인
+    user_liked = False
+    if request.user.is_authenticated:
+        user_liked = post.like_set.filter(user=request.user).exists()
+    
     comments = Comment.objects.filter(post=post).order_by('-created_at')
     prev_post = Post.objects.filter(pk__lt=pk).order_by('-pk').first()
     next_post = Post.objects.filter(pk__gt=pk).order_by('pk').first()
-
+    
     context = {
         'post': post,
         'is_my_post': is_my_post,
+        'user_liked': user_liked,  # 좋아요 상태 추가
         'comments': comments,
         'prev_post': prev_post,
         'next_post': next_post,
     }
-
+    
     # 댓글 작성 처리 (POST 요청)
     if request.method == "POST" and request.user.is_authenticated:
         content = request.POST.get('content')
@@ -54,23 +60,23 @@ def post_detail(request, pk):
                 post=post
             )
             return redirect('blog:post_detail', pk=pk)
-
+    
     # 조회수 증가 처리
     viewed_posts = request.session.get('viewed_posts', [])
     is_viewed = pk in viewed_posts
     is_author = request.user.is_authenticated and request.user == post.author
-
+    
     if not is_author and not is_viewed:
         post.view_count += 1
         post.save(update_fields=['view_count'])
         viewed_posts.append(pk)
-
+        
         if len(viewed_posts) > 100:
             viewed_posts = viewed_posts[-100:]
-
+        
         request.session['viewed_posts'] = viewed_posts
         request.session.modified = True
-
+    
     return render(request, "blog/post_detail.html", context)
 
 
